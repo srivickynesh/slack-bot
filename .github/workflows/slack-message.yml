@@ -18,7 +18,7 @@ jobs:
         go-version: 1.19
 
     - name: Run Go script
-      run: go run main.go
+      run: go run prow_summary.go
       env:
         URL: ${{ secrets.URL }}
         PROW_URL: ${{ secrets.PROW_URL }}
