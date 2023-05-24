@@ -30,7 +30,7 @@ jobs:
         GO111MODULE: "on"
       
     - name: Run script
-      run: go run main.go
+      run: go run prow_summary.go
       env:
         GO111MODULE: "on"
         SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
