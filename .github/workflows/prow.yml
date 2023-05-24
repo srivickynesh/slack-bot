@@ -1,0 +1,36 @@
+name: Go
+
+on:
+  schedule:
+    # * is a special character in YAML so you have to quote this string
+    - cron: '30 3 * * *'
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Set up Go 1.x
+      uses: actions/setup-go@v2
+      with:
+        go-version: ^1.19
+
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v2
+
+    - name: Get dependencies
+      run: go get -v -t -d ./...
+      env:
+        GO111MODULE: "on"
+
+    - name: Build
+      run: go build -v .
+      env:
+        GO111MODULE: "on"
+      
+    - name: Run script
+      run: go run main.go
+      env:
+        GO111MODULE: "on"
+        SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
