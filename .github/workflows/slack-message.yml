@@ -2,10 +2,10 @@ name: Send Slack Message
 
 on:
   schedule:
-    - cron: '0 3 * * *' # This corresponds to 9AM IST (UTC+5:30)
+    - cron: '30 3 * * *'  # Runs every day at 3:30 AM UTC (9 AM IST)
 
 jobs:
-  send-message:
+  build:
     runs-on: ubuntu-latest
 
     steps:
