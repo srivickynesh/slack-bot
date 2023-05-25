@@ -1,8 +1,6 @@
 name: Send Slack Message
 
 on:
-  schedule:
-    - cron: '30 3 * * *'  # Runs every day at 3:30 AM UTC (9 AM IST)
   push:
     branches: [ main ]
   pull_request:
