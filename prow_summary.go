@@ -68,7 +68,7 @@ func ConstructMessage(content, bodyString string) string {
 		re := regexp.MustCompile(`(?s)(Summarizing.*?Test Suite Failed)`)
 		matches := re.FindStringSubmatch(bodyString)
 		if matches == nil {
-			message = "No Failure Summary found\n"
+			message = "Test failure summary not found\n"
 		} else {
 			message = fmt.Sprintf("%s\n", matches[1])
 		}
