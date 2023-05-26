@@ -14,9 +14,11 @@ type SlackMessage struct {
 	Text string `json:"text"`
 }
 
-func RemoveANSIEscapeSequences(text string) string {
-	regex := regexp.MustCompile(`\x1b\[[0-9;]*[a-zA-Z]`)
-	return regex.ReplaceAllString(text, "")
+func RemoveANSIEscapeSequencesFromEachSubstring(text string) string {
+	regex := regexp.MustCompile(`(\x1b\[[0-9;]*[a-zA-Z])(.*?)(\x1b\[[0-9;]*[a-zA-Z])`)
+	return regex.ReplaceAllStringFunc(text, func(substring string) string {
+		return regex.ReplaceAllString(substring, "")
+	})
 }
 
 func FetchTextContent(url string) (string, error) {
@@ -83,13 +85,9 @@ func ConstructMessage(content, bodyString string) (string, bool) {
 		return "", false
 	}
 
-	var failureSummary strings.Builder
-	for _, submatch := range failureMatches {
-		cleanSubmatch := RemoveANSIEscapeSequences(submatch)
-		failureSummary.WriteString(cleanSubmatch)
-	}
+	failureSummary := RemoveANSIEscapeSequencesFromEachSubstring(failureMatches[1])
 
-	message = fmt.Sprintf("%s\n", failureSummary.String())
+	message = fmt.Sprintf("%s\n", failureSummary)
 	message += fmt.Sprintf("Reporting job state: %s\n", strings.TrimSpace(stateMatches[1]))
 
 	durationRegexp := regexp.MustCompile(durationPattern)
