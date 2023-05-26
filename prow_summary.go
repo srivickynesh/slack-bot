@@ -75,7 +75,7 @@ func ConstructMessage(content, bodyString string) (string, bool) {
 		}
 		// Remove ANSI escape sequences from the failure summary
 		failureSummary := RemoveANSIEscapeSequences(matches[1])
-		message = fmt.Sprintf(failureSummary)
+		message = fmt.Sprintf("%s", failureSummary)
 		message += fmt.Sprintf("Reporting job state: %s\n", strings.TrimSpace(stateMatch[1]))
 
 		durationRe := regexp.MustCompile(`Ran for ([\dhms]+)`)
