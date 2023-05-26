@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io"
+	"os"
 	"net/http"
 	"net/url"
 	"regexp"
