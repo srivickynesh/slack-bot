@@ -14,6 +14,11 @@ type SlackMessage struct {
 	Text string `json:"text"`
 }
 
+func RemoveANSIEscapeSequences(text string) string {
+	regex := regexp.MustCompile(`\x1b\[[0-9;]*[a-zA-Z]`)
+	return regex.ReplaceAllString(text, "")
+}
+
 func FetchTextContent(url string) (string, error) {
 	resp, err := http.Get(url)
 	if err != nil {
@@ -58,28 +63,27 @@ func SendMessageToLatestThread(token, channelID, message string) error {
 	return nil
 }
 
-func ConstructMessage(content, bodyString string) string {
+func ConstructMessage(content, bodyString string) (string, bool) {
 	var message string
 	stateRe := regexp.MustCompile(`Reporting job state '(\w+)'`)
 	stateMatch := stateRe.FindStringSubmatch(bodyString)
-	if len(stateMatch) == 2 && stateMatch[1] == "succeeded" {
-		message = fmt.Sprintf("Reporting job state: %s\n", strings.TrimSpace(stateMatch[1]))
-	} else if len(stateMatch) == 2 && stateMatch[1] == "failed" {
+	if len(stateMatch) == 2 && stateMatch[1] == "failed" {
 		re := regexp.MustCompile(`(?s)(Summarizing.*?Test Suite Failed)`)
 		matches := re.FindStringSubmatch(bodyString)
 		if matches == nil {
-			message = "Test failure summary not found\n"
-		} else {
-			message = fmt.Sprintf("%s\n", matches[1])
+			return "", false
 		}
+		// Remove ANSI escape sequences from the failure summary
+		failureSummary := RemoveANSIEscapeSequences(matches[1])
+		message = fmt.Sprintf(failureSummary)
 		message += fmt.Sprintf("Reporting job state: %s\n", strings.TrimSpace(stateMatch[1]))
+
+		durationRe := regexp.MustCompile(`Ran for ([\dhms]+)`)
+		durationMatch := durationRe.FindStringSubmatch(bodyString)
+		message += fmt.Sprintf("\nRan for %s\n", durationMatch[1])
+		return message, true
 	}
-
-	durationRe := regexp.MustCompile(`Ran for ([\dhms]+)`)
-	durationMatch := durationRe.FindStringSubmatch(bodyString)
-	message += fmt.Sprintf("Ran for %s\n", durationMatch[1])
-
-	return message
+	return "", false
 }
 
 func main() {
@@ -97,15 +101,19 @@ func main() {
 		return
 	}
 
-	message := ConstructMessage(content, bodyString)
+	message, sendSlackMessage := ConstructMessage(content, bodyString)
 
-	token := os.Getenv("SLACK_TOKEN")
-	channelID := os.Getenv("CHANNEL_ID")
-	err = SendMessageToLatestThread(token, channelID, message)
-	if err != nil {
-		fmt.Println("Error:", err)
-		return
+	if sendSlackMessage {
+		token := os.Getenv("SLACK_TOKEN")
+		channelID := os.Getenv("CHANNEL_ID")
+		err = SendMessageToLatestThread(token, channelID, message)
+		if err != nil {
+			fmt.Println("Error:", err)
+			return
+		}
+
+		fmt.Println("Slack message sent successfully!")
+	} else {
+		fmt.Println("No test failures found. Slack message not sent.")
 	}
-
-	fmt.Println("Slack message sent successfully!")
 }
