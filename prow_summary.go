@@ -114,7 +114,6 @@ func main() {
 	}
 
 	message, sendSlackMessage := ConstructMessage(content, bodyString)
-
 	if sendSlackMessage {
 		token := os.Getenv("SLACK_TOKEN")
 		channelID := os.Getenv("CHANNEL_ID")
