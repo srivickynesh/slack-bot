@@ -79,13 +79,15 @@ func ConstructMessage(content, bodyString string) (string, bool) {
 
 	failureRegexp := regexp.MustCompile(failurePattern)
 	failureMatches := failureRegexp.FindStringSubmatch(bodyString)
+
+	failureSummary := ""
 	if failureMatches == nil {
-		return "", false
+		failureSummary = "Infrastructure setup issues or failures unrelated to tests were found. No report of test failures was produced. \n"
+	} else {
+		failureSummary = RemoveANSIEscapeSequences(failureMatches[1]) + "\n"
 	}
 
-	failureSummary := RemoveANSIEscapeSequences(failureMatches[1])
-
-	message = fmt.Sprintf("%s\n", failureSummary)
+	message += failureSummary
 	message += fmt.Sprintf("Reporting job state: %s\n", strings.TrimSpace(stateMatches[1]))
 
 	durationRegexp := regexp.MustCompile(durationPattern)
