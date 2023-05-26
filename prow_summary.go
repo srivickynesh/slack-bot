@@ -5,7 +5,6 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"os"
 	"regexp"
 	"strings"
 )
@@ -14,11 +13,9 @@ type SlackMessage struct {
 	Text string `json:"text"`
 }
 
-func RemoveANSIEscapeSequencesFromEachSubstring(text string) string {
-	regex := regexp.MustCompile(`(\x1b\[[0-9;]*[a-zA-Z])(.*?)(\x1b\[[0-9;]*[a-zA-Z])`)
-	return regex.ReplaceAllStringFunc(text, func(substring string) string {
-		return regex.ReplaceAllString(substring, "")
-	})
+func RemoveANSIEscapeSequences(text string) string {
+	regex := regexp.MustCompile(`\x1b\[[0-9;]*[a-zA-Z]`)
+	return regex.ReplaceAllString(text, "")
 }
 
 func FetchTextContent(url string) (string, error) {
@@ -85,7 +82,7 @@ func ConstructMessage(content, bodyString string) (string, bool) {
 		return "", false
 	}
 
-	failureSummary := RemoveANSIEscapeSequencesFromEachSubstring(failureMatches[1])
+	failureSummary := RemoveANSIEscapeSequences(failureMatches[1])
 
 	message = fmt.Sprintf("%s\n", failureSummary)
 	message += fmt.Sprintf("Reporting job state: %s\n", strings.TrimSpace(stateMatches[1]))
@@ -101,6 +98,10 @@ func ConstructMessage(content, bodyString string) (string, bool) {
 }
 
 func main() {
+
+	token := os.Getenv("SLACK_TOKEN")
+	channelID := os.Getenv("CHANNEL_ID")
+
 	url := os.Getenv("URL")
 	content, err := FetchTextContent(url)
 	if err != nil {
@@ -116,9 +117,10 @@ func main() {
 	}
 
 	message, sendSlackMessage := ConstructMessage(content, bodyString)
+
+	fmt.Println(message)
+
 	if sendSlackMessage {
-		token := os.Getenv("SLACK_TOKEN")
-		channelID := os.Getenv("CHANNEL_ID")
 		err = SendMessageToLatestThread(token, channelID, message)
 		if err != nil {
 			fmt.Println("Error:", err)
