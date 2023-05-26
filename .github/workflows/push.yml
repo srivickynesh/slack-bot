@@ -1,0 +1,28 @@
+name: Send Slack Message
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v3
+
+    - name: Setup Go environment
+      uses: actions/setup-go@v4
+      with:
+        go-version: 1.19
+
+    - name: Run Test and Send Slack Message
+      run: go run prow_summary.go
+      env:
+        SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
+        URL: ${{ secrets.URL }}
+        PROW_URL: ${{ secrets.PROW_URL }}
+        CHANNEL_ID: ${{ secrets.CHANNEL_ID }}
