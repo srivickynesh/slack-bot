@@ -15,17 +15,8 @@ type SlackMessage struct {
 }
 
 func RemoveANSIEscapeSequences(text string) string {
-    regex := regexp.MustCompile(`\x1b\[[0-9;]*[a-zA-Z]`)
-    result := regex.ReplaceAllString(text, "")
-
-    // Additional debug logs
-    if text != result {
-        log.Printf("Removed ANSI escape sequences: before [%v] after [%v]", text, result)
-    } else {
-        log.Printf("No ANSI escape sequences found: [%v]", text)
-    }
-
-    return result
+	regex := regexp.MustCompile(`\x1b\[[0-9;]*[a-zA-Z]`)
+	return regex.ReplaceAllString(text, "")
 }
 
 func FetchTextContent(url string) (string, error) {
