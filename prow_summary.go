@@ -92,9 +92,13 @@ func ConstructMessage(content, bodyString string) (string, bool) {
 		return "", false
 	}
 
-	failureSummary := RemoveANSIEscapeSequences(failureMatches[1])
+	var failureSummary strings.Builder
+	for _, submatch := range failureMatches {
+		cleanSubmatch := RemoveANSIEscapeSequences(submatch)
+		failureSummary.WriteString(cleanSubmatch)
+	}
 
-	message = fmt.Sprintf("%s\n", failureSummary)
+	message = fmt.Sprintf("%s\n", failureSummary.String())
 	message += fmt.Sprintf("Reporting job state: %s\n", strings.TrimSpace(stateMatches[1]))
 
 	durationRegexp := regexp.MustCompile(durationPattern)
