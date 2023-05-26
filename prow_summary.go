@@ -15,7 +15,7 @@ type SlackMessage struct {
 }
 
 func RemoveANSIEscapeSequences(text string) string {
-    regex := regexp.MustCompile(`\x1b\[[0-9;]*m?`)
+    regex := regexp.MustCompile(`\x1b\[[0-9;]*[a-zA-Z]`)
     result := regex.ReplaceAllString(text, "")
 
     // Additional debug logs
