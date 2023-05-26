@@ -65,25 +65,37 @@ func SendMessageToLatestThread(token, channelID, message string) error {
 
 func ConstructMessage(content, bodyString string) (string, bool) {
 	var message string
-	stateRe := regexp.MustCompile(`Reporting job state '(\w+)'`)
-	stateMatch := stateRe.FindStringSubmatch(bodyString)
-	if len(stateMatch) == 2 && stateMatch[1] == "failed" {
-		re := regexp.MustCompile(`(?s)(Summarizing.*?Test Suite Failed)`)
-		matches := re.FindStringSubmatch(bodyString)
-		if matches == nil {
-			return "", false
-		}
-		// Remove ANSI escape sequences from the failure summary
-		failureSummary := RemoveANSIEscapeSequences(matches[1])
-		message = fmt.Sprintf("%s", failureSummary)
-		message += fmt.Sprintf("Reporting job state: %s\n", strings.TrimSpace(stateMatch[1]))
+	const statePattern = `Reporting job state '(\w+)'`
+	const failurePattern = `(?s)(Summarizing.*?Test Suite Failed)`
+	const durationPattern = `Ran for ([\dhms]+)`
 
-		durationRe := regexp.MustCompile(`Ran for ([\dhms]+)`)
-		durationMatch := durationRe.FindStringSubmatch(bodyString)
-		message += fmt.Sprintf("\nRan for %s\n", durationMatch[1])
-		return message, true
+	stateRegexp := regexp.MustCompile(statePattern)
+	stateMatches := stateRegexp.FindStringSubmatch(bodyString)
+
+	hasFailed := len(stateMatches) == 2 && stateMatches[1] == "failed"
+	if !hasFailed {
+		return "", false
 	}
-	return "", false
+
+	failureRegexp := regexp.MustCompile(failurePattern)
+	failureMatches := failureRegexp.FindStringSubmatch(bodyString)
+	if failureMatches == nil {
+		return "", false
+	}
+
+	failureSummary := RemoveANSIEscapeSequences(failureMatches[1])
+
+	message = fmt.Sprintf("%s\n", failureSummary)
+	message += fmt.Sprintf("Reporting job state: %s\n", strings.TrimSpace(stateMatches[1]))
+
+	durationRegexp := regexp.MustCompile(durationPattern)
+	durationMatches := durationRegexp.FindStringSubmatch(bodyString)
+
+	if len(durationMatches) >= 2 {
+		message += fmt.Sprintf("Ran for %s\n", durationMatches[1])
+	}
+
+	return message, true
 }
 
 func main() {
