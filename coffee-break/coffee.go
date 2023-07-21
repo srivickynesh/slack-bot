@@ -50,15 +50,15 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// currentMonth := time.Now().Month().String()
-
 	// 	message := `The FIRST PERSON in the list for each group is responsible for scheduling.
 	// If there are conflicts and it is difficult to schedule, this is a communication opportunity.
 	// Msg the other people, explain the situation and ask if anything can be moved.
 	// If one person isn't available, feel free to have the coffee break with the other person.`
 
-	// slackToken := os.Getenv("SLACK_TOKEN")
-	// slackChannelID := os.Getenv("HACBS_CHANNEL_ID")
+	currentMonth := time.Now().Month().String()
+
+	slackToken := os.Getenv("SLACK_TOKEN")
+	slackChannelID := os.Getenv("HACBS_CHANNEL_ID")
 
 	participantsContent, err := ioutil.ReadFile(filepath.Join(dirPath, "coffee-break/participants.txt"))
 	if err != nil {
@@ -104,8 +104,9 @@ func main() {
 		}
 	}
 
-	rand.Seed(time.Now().UnixNano())
-	rand.Shuffle(len(eligibleParticipants), func(i, j int) {
+	source := rand.NewSource(time.Now().UnixNano())
+	r := rand.New(source)
+	r.Shuffle(len(eligibleParticipants), func(i, j int) {
 		eligibleParticipants[i], eligibleParticipants[j] = eligibleParticipants[j], eligibleParticipants[i]
 	})
 
@@ -122,9 +123,9 @@ func main() {
 	}
 
 	// groupMessage := fmt.Sprintf("%s\nCoffee break group for %s is: %s", message, currentMonth, strings.Join(newGroup, ", "))
-	// groupMessage := fmt.Sprintf("\nCoffee break group for %s is: %s", currentMonth, strings.Join(newGroup, ", "))
-	// err = SendMessageToLatestThread(slackToken, slackChannelID, groupMessage)
-	// if err != nil {
-	// 	log.Fatalf("Error sending message to Slack: %v\n", err)
-	// }
+	groupMessage := fmt.Sprintf("\nCoffee break group for %s is: %s", currentMonth, strings.Join(newGroup, ", "))
+	err = SendMessageToLatestThread(slackToken, slackChannelID, groupMessage)
+	if err != nil {
+		log.Fatalf("Error sending message to Slack: %v\n", err)
+	}
 }
