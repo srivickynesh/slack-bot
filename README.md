@@ -1,2 +1,5 @@
-[![Send Slack Message](https://github.com/srivickynesh/slack-prow/actions/workflows/slack-message.yml/badge.svg)](https://github.com/srivickynesh/slack-prow/actions/workflows/slack-message.yml)
-# slack-prow
+[![Prow-CI](https://github.com/srivickynesh/slack-bot/actions/workflows/slack-message.yml/badge.svg)](https://github.com/srivickynesh/slack-bot/actions/workflows/slack-message.yml)
+
+[![Coffee-break](https://github.com/srivickynesh/slack-bot/actions/workflows/coffee.yml/badge.svg)](https://github.com/srivickynesh/slack-bot/actions/workflows/coffee.yml)
+
+# SLACK-BOT

@@ -1,4 +1,4 @@
-name: Send Slack Message
+name: Prow-CI
 
 on:
   schedule:
@@ -18,7 +18,7 @@ jobs:
       uses: actions/setup-go@v4
 
     - name: Run Test and Send Slack Message
-      run: go run prow_summary.go --no-color
+      run: go run prow-ci/prow_summary.go --no-color
       env:
         SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
         URL: ${{ secrets.URL }}
