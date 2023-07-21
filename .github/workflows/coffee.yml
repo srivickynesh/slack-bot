@@ -27,7 +27,7 @@ jobs:
 
     - name: Commit and push if it's not a Pull Request
       run: |
-        pwd
+        git init
         git config user.name "GitHub Action"
         git config user.email "action@github.com"
         git add coffee-break/last_week.txt
