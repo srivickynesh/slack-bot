@@ -3,12 +3,15 @@ name: Coffee-break
 on:
   schedule:
     - cron: '0 0 5 * *'  # This runs at 00:00 UTC on the 5th of every month
+  push:
+    branches:
+      - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
     container: 
-      image: golang:1.19
+      image: golang:1.20
 
     steps:
     - name: Check out code
