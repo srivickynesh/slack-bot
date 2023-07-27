@@ -14,8 +14,16 @@ import (
 	"time"
 )
 
-func SendMessageToLatestThread(token, channelID, message string) error {
+func SendMessageToLatestThread(token, channelID string, users []string) error {
 	slackURL := "https://slack.com/api/chat.postMessage"
+
+	currentMonth := time.Now().Month().String()
+
+	for i, user := range users {
+		users[i] = "<@" + user + ">"
+	}
+
+	message := fmt.Sprintf("Coffee break group for %s is: %s", currentMonth, strings.Join(users, ", "))
 
 	payload := url.Values{}
 	payload.Set("channel", channelID)
@@ -49,13 +57,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	// 	message := `The FIRST PERSON in the list for each group is responsible for scheduling.
-	// If there are conflicts and it is difficult to schedule, this is a communication opportunity.
-	// Msg the other people, explain the situation and ask if anything can be moved.
-	// If one person isn't available, feel free to have the coffee break with the other person.`
-
-	currentMonth := time.Now().Month().String()
 
 	slackToken := os.Getenv("SLACK_TOKEN")
 	slackChannelID := os.Getenv("HACBS_CHANNEL_ID")
@@ -122,9 +123,7 @@ func main() {
 		log.Fatalf("Error writing to last week file: %v\n", err)
 	}
 
-	// groupMessage := fmt.Sprintf("%s\nCoffee break group for %s is: %s", message, currentMonth, strings.Join(newGroup, ", "))
-	groupMessage := fmt.Sprintf("\nCoffee break group for %s is: %s", currentMonth, strings.Join(newGroup, ", "))
-	err = SendMessageToLatestThread(slackToken, slackChannelID, groupMessage)
+	err = SendMessageToLatestThread(slackToken, slackChannelID, newGroup)
 	if err != nil {
 		log.Fatalf("Error sending message to Slack: %v\n", err)
 	}
